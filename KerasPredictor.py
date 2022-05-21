@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from matplotlib.pylab import rcParams
 rcParams['figure.figsize'] = 20, 10
 from keras.models import Sequential
-from keras.layers import LSTM,Dropout,Dense
+from keras.layers import LSTM, Dropout, Dense
 from sklearn.preprocessing import MinMaxScaler
 import yfinance as yf
 import datetime
@@ -17,12 +17,8 @@ print(df.columns.tolist())
 
 # df.index = df.index.strftime('%d/%m/%Y')
 
-
-
 # PV = plt.plot(df["Close"], label='Close Price history')
 # plt.show()
-
-
 
 df = df.sort_index(ascending=True,axis=0)
 data = pd.DataFrame(index=range(0, len(df)),columns=['Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'])
@@ -37,8 +33,7 @@ for i in range(0, len(data)):
 # print(data.head())
 # print(data.tail())
 
-scaler = MinMaxScaler(feature_range=(0, 1))
-
+# scaler = MinMaxScaler(feature_range=(0, 1))
 # data.index = data.Date
 # data.drop("Date", axis=1, inplace=True)
 
@@ -46,11 +41,11 @@ final_data = data.values
 
 train_data = final_data[0:200, :]
 valid_data = final_data[200:, :]
-scaler = MinMaxScaler(feature_range=(0, 1))
+scaler = MinMaxScaler()
 scaled_data = scaler.fit_transform(final_data)
-x_train_data, y_train_data=[], []
+x_train_data, y_train_data = [], []
 
-for i in range(60,len(train_data)):
+for i in range(60, len(train_data)):
     x_train_data.append(scaled_data[i-60:i, 0])
     y_train_data.append(scaled_data[i, 0])
 
