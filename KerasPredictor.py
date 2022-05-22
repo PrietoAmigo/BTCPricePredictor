@@ -69,7 +69,8 @@ model_data = model_data.reshape(-1, 1)
 model_data = scaler.transform(model_data)
 
 lstm_model.compile(loss='mean_squared_error', optimizer='adam')
-lstm_model.fit(x_train_data, y_train_data, epochs=25, batch_size=15, verbose=2)
+lstm_model.fit(x_train_data, y_train_data, epochs=100, batch_size=15, verbose=2,
+               callbacks=keras.callbacks.EarlyStopping(patience=3))
 
 
 # , callbacks=keras.callbacks.EarlyStopping(patience=5)
