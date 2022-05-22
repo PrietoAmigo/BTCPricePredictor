@@ -15,7 +15,7 @@ import yfinance as yf
 import datetime
 
 
-df = yf.download('BTC-USD', start='2013-01-01', end=datetime.date.today(), progress=False)
+df = yf.download('BTC-USD', start='2017-01-01', end=datetime.date.today(), progress=False)
 
 print(df.columns.tolist())
 
@@ -38,8 +38,12 @@ for i in range(0, len(data)):
 
 final_data = data.values
 
-train_data = final_data[0:2300, :]
-valid_data = final_data[2300:, :]
+split_percent = 0.85
+split = int(split_percent*len(final_data))
+
+train_data = final_data[0:split, :]
+valid_data = final_data[split:, :]
+
 scaler = MinMaxScaler()
 scaled_data = scaler.fit_transform(final_data)
 x_train_data, y_train_data = [], []
@@ -56,14 +60,16 @@ y_train_data = np.asarray(y_train_data)
 
 lstm_model = Sequential()
 lstm_model.add(LSTM(units=50, return_sequences=True, input_shape=(np.shape(x_train_data)[1], 1)))
+lstm_model.add(Dropout(0.2))
 lstm_model.add(LSTM(units=50))
+lstm_model.add(Dropout(0.2))
 lstm_model.add(Dense(1))
 model_data = data[len(data)-len(valid_data)-1000:].values
 model_data = model_data.reshape(-1, 1)
 model_data = scaler.transform(model_data)
 
 lstm_model.compile(loss='mean_squared_error', optimizer='adam')
-lstm_model.fit(x_train_data, y_train_data, epochs=15, batch_size=15, verbose=2)
+lstm_model.fit(x_train_data, y_train_data, epochs=25, batch_size=15, verbose=2)
 
 
 # , callbacks=keras.callbacks.EarlyStopping(patience=5)
@@ -74,20 +80,17 @@ for i in range(1000, model_data.shape[0]):
 X_test = np.array(X_test)
 X_test = np.reshape(X_test, (X_test.shape[0], X_test.shape[1], 1))
 
-
+# PREDICT OVER TEST
 predicted_stock_price = lstm_model.predict(X_test)
 predicted_stock_price = scaler.inverse_transform(predicted_stock_price)
 
 
-train_data = data[:2300]
-valid_data = data[2300:]
+train_data = data[:split]
+valid_data = data[split:]
 valid_data['Predictions'] = predicted_stock_price
 plt.plot(train_data["Close"])
 plt.plot(valid_data[['Close', "Predictions"]])
 plt.show()
 
-
-
-lstm_model.save('model.h5')
-
+lstm_model.save('lstm_model.h5')
 
